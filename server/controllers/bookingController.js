@@ -284,3 +284,21 @@ export async function getBooking(req, res) {
     });
   }
 }
+
+// @desc helper function for paystack webhook
+
+export async function markOrderAsPaid(reference) {
+  const booking = await Booking.findOne({ paystackReference: reference });
+  if (!booking) throw new Error("Booking not found");
+
+  await Booking.findOneAndUpdate(
+    { paystackReference: reference },
+    {
+      paymentStatus: "paid",
+    },
+    {
+      new: true,
+      runValidators: false,
+    },
+  );
+}
