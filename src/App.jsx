@@ -1,3 +1,3 @@
 export default function App() {
-  return <div>React App is working...</div>;
+  return <h1>React App is working...</h1>;
 }

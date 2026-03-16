@@ -17,6 +17,6 @@ let browserQueryClient = null;
 
 export function getQueryClient() {
   if (typeof window === "undefined") makeQueryClient();
-  if (!browserQueryClient) browserQueryClient = makeQueryClient;
+  if (!browserQueryClient) browserQueryClient = makeQueryClient();
   return browserQueryClient;
 }

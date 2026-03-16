@@ -1,11 +1,8 @@
-import "dotenv/config";
 import axios from "axios";
 import { getQueryClient } from "./queryClient.js";
 
-const API = import.meta.env.VITE_API_URL;
-
 const api = axios.create({
-  baseURL: API,
+  baseURL: `http://localhost:8000`,
   withCredentials: true,
 });
 
@@ -22,17 +19,20 @@ function processQueue(error, token = null) {
   });
   failedQueue = [];
 }
+
 async function silentRefresh() {
-  const response = await axios.get(`${API}/api/auth/refresh`, {
+  const response = await axios.get(`http://localhost:8000/api/auth/refresh`, {
     withCredentials: true,
   });
+
   const newToken = response.data.accessToken;
 
+  window.__AUTH_TOKEN__ = newToken;
   const { useStore } = await import("../store/store.js");
+
   const user = useStore.getState().auth.user;
-  if (user) {
-    useStore.getState().auth.token = newToken;
-  }
+  if (user) useStore.getState().setAuth(user, newToken);
+
   return newToken;
 }
 
@@ -53,10 +53,10 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     const tokenExpired =
-      error.response?.status === 401 &&
-      error.response?.data?.message === "token expired";
+      error?.response?.status === 401 &&
+      error?.response?.data?.message === "token expired";
 
-    if (!tokenExpired || originalRequest._retry) {
+    if (!tokenExpired || !originalRequest._retry) {
       return Promise.reject(error);
     }
 
@@ -70,14 +70,13 @@ api.interceptors.response.use(
         })
         .catch((err) => Promise.reject(err));
     }
-
     isRefreshing = true;
     originalRequest._retry = true;
     try {
-      const newToken = await silentRefresh();
-      window.__AUTH_TOKEN__ = newToken;
-      processQueue(null, newToken);
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      const token = await silentRefresh();
+      window.__AUTH_TOKEN__ = token;
+      processQueue(null, token);
+      originalRequest.headers.Authorization = `Bearer ${token}`;
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
@@ -86,8 +85,14 @@ api.interceptors.response.use(
       useStore.getState().clearAuth();
       getQueryClient().clear();
       return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
   },
 );
+
+export function setAuthToken(token) {
+  window.__AUTH_TOKEN__ = token;
+}
+
+export function clearAuthToken() {
+  window.__AUTH_TOKEN__ = null;
+}
