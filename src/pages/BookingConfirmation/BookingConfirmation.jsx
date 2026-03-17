@@ -12,7 +12,7 @@ export default function BookingConfirmation() {
   const user = useStore((state) => state.auth.user);
 
   useEffect(() => {
-    if (!reference) return setStatus("failed");
+    if (!reference) return setStatus("loading");
     checkPayment();
   }, []);
 

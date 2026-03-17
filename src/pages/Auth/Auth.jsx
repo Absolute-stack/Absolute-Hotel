@@ -1,250 +1,248 @@
 import "./Auth.css";
 import { useState } from "react";
+import { useStore } from "../../store/store";
+import star_icon from "../../assets/images/star.webp";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../../api/auth.js";
-import { useStore } from "../../store/store.js";
+import { loginUser, registerUser } from "../../api/auth.js";
 import { setAuthToken } from "../../lib/axios.js";
-
-export function Login() {
-  const navigate = useNavigate();
-  const setAuth = useStore((state) => state.setAuth);
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  function handleChange(e) {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    setError(null);
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!form.email || !form.password)
-      return setError("All fields are required");
-    setLoading(true);
-    try {
-      const { user, accessToken } = await loginUser(form);
-      setAuthToken(accessToken);
-      setAuth(user, accessToken);
-      navigate("/");
-    } catch (err) {
-      setError(err?.response?.data?.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="auth-page">
-      <div className="auth-page__left">
-        <img
-          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200"
-          alt="Absolute Hotel"
-          className="auth-page__bg"
-        />
-        <div className="auth-page__overlay" />
-        <div className="auth-page__left-content">
-          <div className="auth-page__logo">
-            <span style={{ color: "var(--color-accent)" }}>✦</span> Absolute
-            Hotel
-          </div>
-          <blockquote className="auth-page__quote">
-            "Where every stay becomes an unforgettable experience."
-          </blockquote>
-        </div>
-      </div>
-
-      <div className="auth-page__right">
-        <div className="auth-form">
-          <Link to="/" className="auth-form__back">
-            ← Back to Home
-          </Link>
-
-          <div className="auth-form__header">
-            <p className="label">Welcome back</p>
-            <h1 className="display-md auth-form__title">Sign In</h1>
-            <p className="auth-form__sub">
-              Don't have an account? <Link to="/register">Register</Link>
-            </p>
-          </div>
-
-          <a
-            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
-            className="auth-form__google"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Continue with Google
-          </a>
-
-          <div className="auth-form__divider">
-            <span>or</span>
-          </div>
-
-          <form onSubmit={handleSubmit} className="auth-form__fields">
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-              />
-            </div>
-
-            {error && <p className="error-text">{error}</p>}
-
-            <button
-              type="submit"
-              className="btn btn--primary btn--full btn--lg"
-              disabled={loading}
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
+import register_img from "../../assets/images/register.webp";
+import login_img from "../../assets/images/login.webp";
+import google_icon from "../../assets/images/google.svg";
 
 export function Register() {
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const setAuth = useStore((state) => state.setAuth);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  function handleChange(e) {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    setError(null);
+  function validateForm() {
+    if (!form.name) return setError("Name is required");
+    if (!form.email) return setError("Email is required");
+    if (!form.password) return setError("Password is required");
+    return null;
+  }
+
+  function handleFormChange(e) {
+    return setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password)
-      return setError("All fields are required");
-    if (form.password.length < 8)
-      return setError("Password must be at least 8 characters");
-    setLoading(true);
     try {
-      const { registerUser } = await import("../../api/auth.js");
+      if (validateForm()) return;
+      setIsLoading(true);
       const { user, accessToken } = await registerUser(form);
       setAuthToken(accessToken);
       setAuth(user, accessToken);
       navigate("/");
-    } catch (err) {
-      setError(err?.response?.data?.message || "Registration failed");
+    } catch (error) {
+      setError("Something went wrong please try again later");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-page__left">
+    <main className="register-page">
+      <div className="register-left">
         <img
-          src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200"
-          alt="Absolute Hotel"
-          className="auth-page__bg"
+          src={register_img}
+          alt="Hotel pool side view"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
-        <div className="auth-page__overlay" />
-        <div className="auth-page__left-content">
-          <div className="auth-page__logo">
-            <span style={{ color: "var(--color-accent)" }}>✦</span> Absolute
-            Hotel
+        <div className="register-image-content">
+          <div className="register-title-container">
+            <img
+              src={star_icon}
+              alt="star_icon"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+            <p>Absolute Hotel</p>
           </div>
-          <blockquote className="auth-page__quote">
-            "Join thousands of guests who trust us for their perfect getaway."
-          </blockquote>
+          <p className="overlay-text-style ove-text">
+            "Join the thousands who trust us for their perfect getaway"
+          </p>
         </div>
       </div>
-
-      <div className="auth-page__right">
-        <div className="auth-form">
-          <Link to="/" className="auth-form__back">
-            ← Back to Home
-          </Link>
-
-          <div className="auth-form__header">
-            <p className="label">Get started</p>
-            <h1 className="display-md auth-form__title">Create Account</h1>
-            <p className="auth-form__sub">
-              Already have an account? <Link to="/login">Sign in</Link>
-            </p>
+      <div className="register-right">
+        <form onSubmit={handleSubmit}>
+          <span onClick={() => navigate("/")}>&larr; Back to Home</span>
+          <p className="highlight-text">GET STARTED</p>
+          <p className="title-text">Create Account</p>
+          <p className="hover-text-1" onClick={() => navigate("/login")}>
+            Already have an account? or Sign-in with Google
+          </p>
+          <div className="form-group">
+            <label htmlFor="name" className="label-1">
+              FULL NAME
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              placeholder="John Doe"
+              onChange={handleFormChange}
+            />
           </div>
+          <div className="form-group">
+            <label htmlFor="email" className="label-1">
+              EMAIL
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              placeholder="johndoe@gmail.com"
+              onChange={handleFormChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password" className="label-1">
+              PASSWORD
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              placeholder="8 Min Characters"
+              onChange={handleFormChange}
+            />
+          </div>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Creating Account" : "Create Account"}
+          </button>
+          {error && <pre>{error}</pre>}
+        </form>
+      </div>
+    </main>
+  );
+}
 
-          <form onSubmit={handleSubmit} className="auth-form__fields">
+export function Login() {
+  const navigate = useNavigate();
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const setAuth = useStore((state) => state.setAuth);
+
+  function validateError() {
+    if (!loginForm.email) return setError("Email is required");
+    if (!loginForm.password) return setError("Password is required");
+    return null;
+  }
+
+  function handleLoginFormChange(e) {
+    setLoginForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (validateError()) return;
+    try {
+      setIsLoading(true);
+      const { user, accessToken } = await loginUser(loginForm);
+      setAuthToken(accessToken);
+      setAuth(user, accessToken);
+      navigate("/");
+    } catch (error) {
+      setError("Email or Password is invalid");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogle() {
+    window.location.href = "http://localhost:8000/api/auth/google";
+  }
+
+  return (
+    <main className="login-page">
+      <div className="login-left">
+        <img
+          src={login_img}
+          alt="Hotel image of pool side with large open area"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+        />
+        <div className="login-left-content">
+          <div className="login-left-title-container flex">
+            <img
+              src={star_icon}
+              alt="star icon"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+            <p>Absolute Hotel</p>
+          </div>
+          <p className="overlay-text-style ove-text">
+            Where every stay becomes an unforgettable experience
+          </p>
+        </div>
+      </div>
+      <div className="login-right">
+        <div className="container">
+          <span onClick={() => navigate("/")} className="hover-text-1">
+            &larr; Back to Home
+          </span>
+          <p className="highlight-text">WELCOME BACK</p>
+          <p className="title-text">SIGN IN</p>
+          <p className="flex-sml">
+            Don't have an Account?{" "}
+            <Link to="/register" className="highlight-text">
+              Register
+            </Link>
+          </p>
+          <button className="google-btn flex" onClick={handleGoogle}>
+            <img
+              src={google_icon}
+              alt="google-icon"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="google_icon"
+            />
+            <p>Continue with Google</p>
+          </button>
+          <span className="or-span">or</span>
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="name"
-                placeholder="John Doe"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
+              <label htmlFor="email" className="label-1">
+                EMAIL
+              </label>
               <input
                 type="email"
                 name="email"
-                placeholder="your@email.com"
-                value={form.email}
-                onChange={handleChange}
+                placeholder="johndoe@gmail.com"
+                value={loginForm.email}
+                onChange={handleLoginFormChange}
               />
             </div>
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="password" className="label-1">
+                PASSWORD
+              </label>
               <input
                 type="password"
                 name="password"
-                placeholder="Min 8 characters"
-                value={form.password}
-                onChange={handleChange}
+                placeholder="Min Characters 8"
+                value={loginForm.password}
+                onChange={handleLoginFormChange}
               />
             </div>
-
-            {error && <p className="error-text">{error}</p>}
-
-            <button
-              type="submit"
-              className="btn btn--primary btn--full btn--lg"
-              disabled={loading}
-            >
-              {loading ? "Creating account..." : "Create Account"}
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? "Signing In" : "Sign In"}
             </button>
+            {error && <pre>{error}</pre>}
           </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

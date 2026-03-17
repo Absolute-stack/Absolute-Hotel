@@ -89,12 +89,16 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select("+password");
+    console.log("User found:", !!user);
+    console.log("Email received:", email);
+
     if (!user)
       return res.status(400).json({
         success: false,
         message: "Invalid email or password",
       });
     const isMatch = await user.comparePassword(password);
+    console.log("Password match:", isMatch);
     if (!isMatch)
       return res.status(400).json({
         success: false,
@@ -103,7 +107,6 @@ export async function login(req, res) {
     const accessToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
     user.refreshToken = refreshToken;
-    await user.save({ validateBeforeSave: false });
 
     sendRefreshToken(res, refreshToken);
     return res.status(200).json({
