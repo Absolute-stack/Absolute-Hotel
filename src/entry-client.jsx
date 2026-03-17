@@ -1,22 +1,43 @@
 import App from "./App.jsx";
 import { StrictMode } from "react";
-import { hydrateRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { getQueryClient } from "./lib/queryClient.js";
-import { QueryClientProvider, HydrationBoundary } from "@tanstack/react-query";
+import { hydrateRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setAuthToken } from "./lib/axios.js";
 
-const queryClient = getQueryClient();
-const dehydratedState = window.__REACT_QUERY_STATE__;
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      retry: 1,
+    },
+  },
+});
 
-hydrateRoot(
-  document.getElementById("root"),
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <HydrationBoundary state={dehydratedState}>
+async function initAuth() {
+  try {
+    const { refresh, getMe } = await import("./api/auth.js");
+    const { useStore } = await import("./store/store.js");
+
+    const { accessToken } = await refresh();
+    setAuthToken(accessToken);
+
+    const { user } = await getMe();
+    useStore.getState().setAuth(user, accessToken);
+  } catch {
+    // Guest user — app loads normally
+  }
+}
+
+initAuth().finally(() => {
+  hydrateRoot(
+    document.getElementById("root"),
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </HydrationBoundary>
-    </QueryClientProvider>
-  </StrictMode>,
-);
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+});

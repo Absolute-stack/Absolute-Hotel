@@ -9,7 +9,7 @@ import { protect, adminProtect, optionalAuth } from "../middleware/protect.js";
 
 export const reviewRouter = express.Router();
 
-reviewRouter.post("/review/create", protect, createReview);
-reviewRouter.get("/room-reviews", optionalAuth, getRoomReviews);
+reviewRouter.post("/create", protect, createReview);
+reviewRouter.get("/room-reviews/:roomId", optionalAuth, getRoomReviews);
 reviewRouter.patch("/update/:id", protect, updateReview);
 reviewRouter.delete("/delete/:id", protect, deleteReview);

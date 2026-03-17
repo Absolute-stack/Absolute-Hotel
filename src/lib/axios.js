@@ -1,10 +1,17 @@
 import axios from "axios";
 import { getQueryClient } from "./queryClient.js";
 
-const api = axios.create({
-  baseURL: `http://localhost:8000`,
-  withCredentials: true,
-});
+export const api = axios.create(
+  {
+    baseURL: `http://localhost:8000`,
+    withCredentials: true,
+  },
+  {
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    },
+  },
+);
 
 let failedQueue = [];
 let isRefreshing = false;

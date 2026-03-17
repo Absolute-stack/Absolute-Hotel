@@ -16,6 +16,6 @@ bookingRouter.post("/create", optionalAuth, createBooking);
 bookingRouter.get("/all", adminProtect, getAllBookings);
 bookingRouter.get("/bookings", protect, getMyBookings);
 bookingRouter.get("/guest-lookup", optionalAuth, guestLookup);
-bookingRouter.get("/booking/:id", protect, getBooking);
+bookingRouter.get("/:id", protect, getBooking);
 bookingRouter.patch("/update/:id", adminProtect, updateBooking);
 bookingRouter.delete("/delete/:id", adminProtect, deleteBooking);

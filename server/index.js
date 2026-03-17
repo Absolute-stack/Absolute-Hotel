@@ -13,13 +13,13 @@ import { paystackRouter } from "./routes/paystackRoutes.js";
 import { paystackWebhook } from "./controllers/paystackController.js";
 
 const app = express();
-const PORT = process.env.PORT || 7000;
+const PORT = process.env.PORT || 8000;
 
 await connectDB();
 
 app.use(
   cors({
-    origin: "http://localhost:7000",
+    origin: "http://localhost:9000",
     credentials: true,
   }),
 );

@@ -71,3 +71,5 @@ async function recalculatingRoomRating(roomId) {
     totalReviews: results?.[0].totalReviews ?? 0,
   });
 }
+
+export const Review = mongoose.model("Review", reviewSchema);
