@@ -21,7 +21,7 @@ export async function createBooking(req, res) {
     const guest = !req.user;
     if (guest && (!guestName || !guestEmail || !guestPhone))
       return res.status(400).json({
-        success: true,
+        success: false,
         message: "Name email and phone is required",
       });
 
@@ -60,7 +60,9 @@ export async function createBooking(req, res) {
     const overlap = await Booking.findOne({
       room: roomId,
       status: { $in: ["pending", "confirmed"] },
-      $or: { checkIn: { $lte: checkOutDate }, checkOut: { $gte: checkInDate } },
+      $or: [
+        { checkIn: { $lte: checkOutDate }, checkOut: { $gte: checkInDate } },
+      ],
     });
     if (overlap)
       return res.status(400).json({
@@ -83,8 +85,8 @@ export async function createBooking(req, res) {
       customer,
       room: roomId,
       guests,
-      checkIn: checkOutDate,
-      checkOut: checkInDate,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
       totalPrice,
       status: "pending",
       paymentStatus: "unpaid",
@@ -154,7 +156,7 @@ export async function updateBooking(req, res) {
     });
     if (!booking)
       return res.status(400).json({
-        success: true,
+        success: false,
         message: "Booking not found",
       });
     return res.status(200).json({
@@ -252,6 +254,10 @@ export async function guestLookup(req, res) {
         success: false,
         message: "Booking not found",
       });
+    return res.status(200).json({
+      booking,
+      success: true,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -262,7 +268,7 @@ export async function guestLookup(req, res) {
 }
 
 // @desc guestOrderLookup
-// @route GET /api/booking/booking
+// @route GET /api/booking/booking/:id
 // @access protect
 export async function getBooking(req, res) {
   try {

@@ -24,11 +24,11 @@ export async function getAllRooms(req, res) {
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
-    if (capacity) filter.capacity = { $lte: Number(capacity) };
-    if (isAvailable !== undefined) filter.isAvailable = isAvailable === true;
+    if (capacity) filter.capacity = { $gte: Number(capacity) };
+    if (isAvailable !== undefined) filter.isAvailable = isAvailable === "true";
     if (cursor) filter._id = { $lt: cursor };
     const rooms = await Room.find(filter)
-      .sort({ createdAt: -1, _id: 1 })
+      .sort({ createdAt: -1, _id: -1 })
       .limit(limitNum + 1)
       .lean();
 
@@ -129,7 +129,9 @@ export async function checkAvailability(req, res) {
     const overlapping = await Booking.findOne({
       room: req.params.id,
       status: { $in: ["pending", "confirmed"] },
-      $or: { checkIn: { $lte: checkOutDate }, checkout: { $gte: checkInDate } },
+      $or: [
+        { checkIn: { $lte: checkOutDate }, checkout: { $gte: checkInDate } },
+      ],
     });
     return res.status(200).json({ success: true, available: !overlapping });
   } catch (error) {
@@ -247,7 +249,6 @@ export async function updateRoom(req, res) {
       new: true,
       runValidators: false,
     });
-    await room.save({ validateBeforeSave: false });
     return res.status(200).json({
       room,
       success: true,

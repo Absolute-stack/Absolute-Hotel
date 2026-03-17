@@ -3,7 +3,7 @@ import { Review } from "../models/reviewModel.js";
 
 // @desc create a review
 // @route POST /api/review/create
-// @access adminProtect
+// @access protect
 export async function createReview(req, res) {
   try {
     const { bookingId, title, comment, rating } = req.body;
@@ -12,10 +12,7 @@ export async function createReview(req, res) {
         success: false,
         message: "Booking needed to write a review",
       });
-    const booking = await Booking.findById(bookingId).populate(
-      "customer.userId",
-      "name image",
-    );
+    const booking = await Booking.findById(bookingId);
     if (!booking)
       return res.status(400).json({
         success: false,
@@ -34,6 +31,7 @@ export async function createReview(req, res) {
       title,
       comment,
       rating,
+      isVerified: true,
     });
     return res.status(200).json({
       review,
@@ -117,7 +115,7 @@ export async function updateReview(req, res) {
 // @access protect
 export async function deleteReview(req, res) {
   try {
-    const review = await Review.findByIdAndDelete(req.params.id);
+    const review = await Review.findOneAndDelete({ _id: req.params.id });
     if (!review)
       return res.status(400).json({
         success: false,

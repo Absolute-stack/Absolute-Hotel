@@ -32,11 +32,11 @@ export async function initializePayment(req, res) {
       });
 
     const reference = `booking_${booking._id}_${Date.now()}`;
-    const response = await axios.get(
+    const response = await axios.post(
       `${PAYSTACK_BASE}/transaction/initialize`,
       {
         email: booking?.customer?.email,
-        amount: booking.totalAmount * 100,
+        amount: booking.totalPrice * 100,
         callback_url: `${process.env.CLIENT_URL}/order-confirmation?reference=${reference}`,
         metadata: {
           name: booking.customer?.name,
@@ -45,7 +45,8 @@ export async function initializePayment(req, res) {
           checkIn: booking.checkIn,
           checkOut: booking.checkOut,
           nights: Math.ceil(
-            new Date(checkOut) - new Date(checkIn) / (24 * 60 * 60 * 1000),
+            new Date(booking.checkOut) -
+              new Date(booking.checkIn) / (24 * 60 * 60 * 1000),
           ),
           totalPrice: booking.totalPrice,
           status: booking.status,
@@ -90,7 +91,7 @@ export async function paystackWebhook(req, res) {
       .digest("hex");
 
     if (signature !== expectedSignature)
-      return res.status(500).json({
+      return res.status(400).json({
         success: false,
         message: "Invalid signature",
       });
@@ -101,7 +102,7 @@ export async function paystackWebhook(req, res) {
       const verify = await axios.get(
         `${PAYSTACK_BASE}/transaction/verify/${reference}`,
         {
-          header: {
+          headers: {
             Authorization: `Bearer ${PAYSTACK_SECRET}`,
           },
         },
@@ -134,11 +135,6 @@ export async function verifyPayment(req, res) {
         message: "Payment verification requires reference",
       });
     const booking = await Booking.findOne({ paystackReference: reference });
-    if (booking.payment !== paid)
-      return res.status(400).json({
-        success: false,
-        message: "Booking is unpaid",
-      });
     return res.status(200).json({
       success: true,
       paid: booking.paymentStatus === "paid",
