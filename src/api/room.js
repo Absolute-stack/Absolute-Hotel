@@ -16,6 +16,8 @@ export async function fetchRooms(filters = {}, pageParam) {
   if (filters.minPrice) params.set("minPrice", filters.minPrice);
   if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
   if (filters.capacity) params.set("capacity", filters.capacity);
+  if (filters.checkIn) params.set("checkIn", filters.checkIn);
+  if (filters.checkOut) params.set("checkOut", filters.checkOut);
 
   const res = await fetch(`${getApi()}/api/room/all?${params}`);
   if (!res.ok) throw new Error("Fetching rooms failed");

@@ -19,6 +19,7 @@
   --color-success: #2d7a4f;
   --color-error: #c0392b;
 
+  --ff-main: "DM Sans", sans-serif;
   --ff-sub: "Cormorant Garamond", serif;
 }
 
@@ -90,6 +91,33 @@
     format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
+/* dm-sans-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/fonts/dm-sans-v17-latin-regular.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* dm-sans-500 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 500;
+  src: url("./assets/fonts/dm-sans-v17-latin-500.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* dm-sans-800 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 800;
+  src: url("./assets/fonts/dm-sans-v17-latin-800.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
 *,
 *::after,
 *::before {
@@ -117,7 +145,25 @@ button {
   background-color: transparent;
 }
 
+button {
+  cursor: pointer;
+}
+
 /* utility classes */
+.container {
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+.btn-1 {
+  color: white;
+  font-weight: 800;
+  border-radius: 0.3rem;
+  height: 30px;
+  padding-inline: 1rem;
+  background-color: var(--color-accent);
+}
+
 .overlay-text-style {
   font: 1.4rem;
   color: white;
@@ -130,6 +176,16 @@ button {
   font-weight: 500;
   text-transform: capitalize;
   letter-spacing: 0.4px;
+}
+
+.highlight-text-2 {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: capitalize;
+  color: rgb(160, 138, 16);
+  text-align: center;
+  margin-block-start: 2rem;
 }
 
 .hover-text-1 {
@@ -147,6 +203,22 @@ button {
   font-size: 2rem;
   font-weight: 500;
   letter-spacing: 0.6px;
+}
+.title-text-1 {
+  font-family: var(--ff-sub);
+  font-style: italic;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-align: center;
+}
+.center {
+  text-align: center;
+  margin-inline: auto;
+}
+
+.mw-40ch {
+  max-width: 40ch;
 }
 
 .label-1 {
@@ -168,7 +240,16 @@ button {
   align-items: center;
 }
 
+.flex-sb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 body {
+  font-family: var(--ff-main);
+  font-weight: 400;
   font-size: 0.8rem;
   line-height: 1.5;
+  background-color: var(--color-bg);
 }

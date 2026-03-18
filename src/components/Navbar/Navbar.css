@@ -1,0 +1,48 @@
+.nav {
+  position: fixed;
+  top: 0;
+  color: white;
+  width: 100%;
+  padding-block: 0.5rem;
+  background-color: transparent;
+  z-index: 999;
+}
+
+.left img {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-profile-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.user-info-container {
+  position: relative;
+}
+
+.dropdown {
+  gap: 0.2rem;
+  display: grid;
+  padding: 1rem;
+  bottom: -62px;
+  position: absolute;
+  width: max-content;
+  border-radius: 1rem;
+  margin-inline-end: 3rem;
+  background-color: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.8s ease;
+}
+
+.logged-in-container:where(:hover) .dropdown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-links-container a {
+  color: white;
+}

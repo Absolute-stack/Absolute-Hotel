@@ -15,6 +15,8 @@ export async function getAllRooms(req, res) {
       limit = 10,
       isAvailable,
       cursor,
+      checkIn,
+      checkOut,
     } = req.query;
     const limitNum = Math.min(Number(limit), 50);
     const filter = {};
@@ -26,7 +28,19 @@ export async function getAllRooms(req, res) {
     }
     if (capacity) filter.capacity = { $gte: Number(capacity) };
     if (isAvailable !== undefined) filter.isAvailable = isAvailable === "true";
-    if (cursor) filter._id = { $lt: cursor };
+
+    if (checkIn && checkOut) {
+      const bookedRoomIds = await Booking.distinct("room", {
+        status: { $in: ["pending", "confirmed"] },
+        $or: [
+          { checkIn: { $lt: new Date(checkOut) } },
+          { checkOut: { $gt: new Date(checkIn) } },
+        ],
+      });
+      filter._id = { $nin: bookedRoomIds };
+    }
+    if (cursor) filter._id = { ...filter._id, $lt: cursor };
+
     const rooms = await Room.find(filter)
       .sort({ createdAt: -1, _id: -1 })
       .limit(limitNum + 1)
