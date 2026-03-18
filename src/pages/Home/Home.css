@@ -78,3 +78,139 @@
   font-size: 3rem;
   text-align: center;
 }
+
+.rooms-grid {
+  gap: 1rem;
+  display: grid;
+  margin-block-start: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card-layout {
+  max-width: 360px;
+  overflow: hidden;
+  border-radius: 1rem;
+  font-family: var(--ff-sub);
+  font-style: italic;
+  font-weight: 400;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  padding-block-end: 2rem;
+}
+
+.card-layout .room-card-img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.card-layout .card-stats {
+  margin-block-start: 0.5rem;
+  padding-inline: 1rem;
+}
+
+.card-layout .card-name {
+  padding-inline-start: 1rem;
+  margin-block-start: 0.5rem;
+}
+.card-layout .card-amenities {
+  padding-inline-start: 1rem;
+  margin-block-start: 0.5rem;
+}
+
+.rating-container {
+  font-family: var(--ff-main);
+  font-style: normal;
+}
+
+.rating-container img {
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  object-fit: cover;
+}
+.card-price-details {
+  font-style: normal;
+  padding-inline: 1rem;
+  margin-block-start: 0.5rem;
+  font-family: var(--ff-main);
+}
+
+.guests img {
+  width: 20px;
+  height: 20px;
+}
+
+.view-rooms-btn {
+  display: flex;
+  margin-inline: auto;
+  height: 40px;
+  color: white;
+  font-weight: 800;
+  margin-block: 2rem;
+  padding-inline: 2rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-accent);
+}
+
+.amenities-grid {
+  gap: 2rem;
+  display: grid;
+  padding: 7rem 3rem;
+  background-color: lightgray;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.amenity-card {
+  display: grid;
+  place-items: center;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 1rem;
+  transition: 0.3s ease;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+.amenity-card:where(:hover) {
+  background-color: rgba(255, 255, 255, 0.266);
+  cursor: pointer;
+  transform: translateY(-2px);
+}
+
+.amenity-icon {
+  font-size: 3rem;
+}
+
+.cta {
+  padding-block: 2rem;
+  background-color: rgb(7, 7, 0);
+}
+
+.cta .right-container {
+  padding-inline-start: 2rem;
+}
+
+.cta .right-container p:nth-of-type(1) {
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 900;
+  font-family: var(--ff-sub);
+}
+.cta .right-container p:nth-of-type(2) {
+  color: white;
+  font-size: 2rem;
+  font-weight: 400;
+  font-family: var(--ff-sub);
+}
+
+.cta button {
+  padding-inline: 2rem;
+  color: white;
+  font-weight: 500;
+  margin-inline-end: 2rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-accent);
+}

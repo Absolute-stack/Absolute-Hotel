@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useRooms } from "../../hooks/useRooms.js";
 import Navbar from "../../components/Navbar/Navbar.jsx";
 import hero_img from "../../assets/images/hotel_hero.webp";
+import RoomCard from "../../components/RoomCard/RoomCard.jsx";
+import Footer from "../../components/Footer/Footer.jsx";
 
 export default function Home() {
   const [checkIn, setCheckIn] = useState("");
@@ -11,9 +13,18 @@ export default function Home() {
   const [guests, setGuests] = useState(1);
   const navigate = useNavigate();
 
+  const AMENITIES = [
+    { icon: "🏊", label: "Infinity Pool" },
+    { icon: "🍽️", label: "Fine Dining" },
+    { icon: "💆", label: "Luxury Spa" },
+    { icon: "🏋️", label: "Fitness Center" },
+    { icon: "🚗", label: "Valet Parking" },
+    { icon: "🛎️", label: "24/7 Concierge" },
+  ];
+
   const { data, isPending } = useRooms({ limit: 6 });
 
-  const rooms = data?.pages?.map((page) => page.rooms) ?? [];
+  const rooms = data?.pages?.flatMap((page) => page.rooms) ?? [];
 
   function handleSearch(e) {
     e.preventDefault();
@@ -140,11 +151,43 @@ export default function Home() {
           <div className="rooms-grid">
             {rooms &&
               rooms.map((room) => {
-                return <div className="room"></div>;
+                return <RoomCard key={room._id} room={room} />;
               })}
           </div>
+          <button
+            type="button"
+            className="view-rooms-btn"
+            onClick={() => navigate("/rooms")}
+          >
+            View All Rooms
+          </button>
         </section>
       </div>
+
+      <section className="amenities-section">
+        <h3 className="highlight-text-2">WORLD CLASS</h3>
+        <h3 className="title-text-1">Hotel Amenities</h3>
+        <div className="amenities-grid">
+          {AMENITIES.map((amenity) => {
+            return (
+              <div className="amenity-card">
+                <p className="amenity-icon">{amenity.icon}</p>
+                <p className="amenity-label">{amenity.label}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      <div className="cta flex-sb">
+        <div className="right-container">
+          <p>Limited Availability</p>
+          <p>Reserve Your Stay Today</p>
+        </div>
+        <button type="button" onClick={() => navigate("/rooms")}>
+          Book Room
+        </button>
+      </div>
+      <Footer />
     </main>
   );
 }

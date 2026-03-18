@@ -1,4 +1,5 @@
 import "./Navbar.css";
+import { useEffect, useState } from "react";
 import { useStore } from "../../store/store.js";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import star_icon from "../../assets/images/star.webp";
@@ -7,6 +8,7 @@ export default function Navbar() {
   const user = useStore((state) => state.auth.user);
   const clearAuth = useStore((state) => state.clearAuth);
   const navigate = useNavigate();
+  const [active, setActive] = useState("");
 
   function handleLogout() {
     clearAuth();
@@ -15,8 +17,20 @@ export default function Navbar() {
     }, 0);
   }
 
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 20) {
+        setActive("active");
+      } else {
+        setActive("");
+      }
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="nav">
+    <nav className={`nav ${active}`}>
       <div className="container flex-sb">
         <div
           onClick={() => navigate("/")}
@@ -52,8 +66,8 @@ export default function Navbar() {
                   <p style={{ color: "white" }}>{user.name}</p>{" "}
                   <span>
                     <img
-                      src={user.image}
-                      alt="profile picture of user"
+                      src={user?.image?.[0]}
+                      alt="dp"
                       loading="eager"
                       decoding="async"
                       fetchPriority="high"

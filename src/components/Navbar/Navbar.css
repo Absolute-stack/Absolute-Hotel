@@ -5,7 +5,15 @@
   width: 100%;
   padding-block: 0.5rem;
   background-color: transparent;
+  transition: 0.3s ease;
   z-index: 999;
+}
+
+.nav.active {
+  padding: 0.9rem;
+  z-index: 999;
+  background-color: white;
+  color: var(--color-accent-dark);
 }
 
 .left img {
@@ -41,8 +49,4 @@
 .logged-in-container:where(:hover) .dropdown {
   opacity: 1;
   pointer-events: auto;
-}
-
-.nav-links-container a {
-  color: white;
 }
