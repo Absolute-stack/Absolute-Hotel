@@ -55,13 +55,19 @@ export async function optionalAuth(req, res, next) {
       req.user = null;
       return next();
     }
-    let decoded;
     try {
-      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       req.user = decoded;
       return next();
     } catch (error) {
-      console.error(error);
+      // ← return 401 specifically for expired tokens so client can refresh
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid or expired token",
+        });
+      }
+      // invalid/malformed token — treat as guest
       req.user = null;
       return next();
     }

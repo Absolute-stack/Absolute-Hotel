@@ -19,8 +19,8 @@ export function useRooms(filters = {}) {
 export function useRoomFilters() {
   return useQuery({
     queryKey: ["room-filters"],
-    queryFn: () => fetchRoomFilters,
-    stateTime: 30 * 60 * 1000,
+    queryFn: fetchRoomFilters,
+    staleTime: 30 * 60 * 1000,
   });
 }
 

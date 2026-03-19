@@ -1,17 +1,13 @@
 import axios from "axios";
 import { getQueryClient } from "./queryClient.js";
 
-export const api = axios.create(
-  {
-    baseURL: `http://localhost:8000`,
-    withCredentials: true,
+export const api = axios.create({
+  baseURL: `http://localhost:8000`,
+  withCredentials: true,
+  headers: {
+    "ngrok-skip-browser-warning": "true",
   },
-  {
-    headers: {
-      "ngrok-skip-browser-warning": "true",
-    },
-  },
-);
+});
 
 let failedQueue = [];
 let isRefreshing = false;
@@ -61,9 +57,9 @@ api.interceptors.response.use(
 
     const tokenExpired =
       error?.response?.status === 401 &&
-      error?.response?.data?.message === "token expired";
+      error?.response?.data?.message === "Invalid or expired token";
 
-    if (!tokenExpired || !originalRequest._retry) {
+    if (!tokenExpired || originalRequest._retry) {
       return Promise.reject(error);
     }
 

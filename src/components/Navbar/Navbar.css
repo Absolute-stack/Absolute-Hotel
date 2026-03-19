@@ -12,7 +12,8 @@
 .nav.active {
   padding: 0.9rem;
   z-index: 999;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.378);
+  backdrop-filter: blur(2px);
   color: var(--color-accent-dark);
 }
 

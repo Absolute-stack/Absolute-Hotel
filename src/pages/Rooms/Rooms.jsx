@@ -1,164 +1,119 @@
 import "./Rooms.css";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useRooms, useRoomFilters } from "../../hooks/useRooms.js";
+import { useRoomFilters, useRooms } from "../../hooks/useRooms.js";
 import RoomCard from "../../components/RoomCard/RoomCard.jsx";
 import Navbar from "../../components/Navbar/Navbar.jsx";
-import Footer from "../../components/Footer/Footer.jsx";
-
-const TYPES = ["single", "double", "suite", "penthouse"];
 
 export default function Rooms() {
-  const [searchParams] = useSearchParams();
+  const [SearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    type: searchParams.get("type") || "",
+    type: SearchParams.get("type") || "",
+    checkIn: SearchParams.get("checkIn") || "",
+    checkOut: SearchParams.get("checkOut") || "",
     minPrice: "",
     maxPrice: "",
-    capacity: searchParams.get("guests") || "",
   });
 
-  const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
+  const { data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useRooms(filters);
-  const { data: filterData } = useRoomFilters();
 
-  const rooms = data?.pages?.flatMap((p) => p.rooms) ?? [];
+  if (isPending) return <div>Loading...</div>;
 
-  function handleFilter(key, value) {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value === prev[key] ? "" : value,
-    }));
-  }
+  let allRooms = data?.pages?.flatMap((page) => page.rooms);
 
   return (
-    <div className="rooms-page">
+    <main className="rooms">
       <Navbar />
-
-      <div className="rooms-page__hero">
-        <div className="container">
-          <p className="label">Our Collection</p>
-          <h1 className="display-lg rooms-page__title">Rooms & Suites</h1>
-          <p className="rooms-page__sub">
-            {rooms.length > 0
-              ? `${rooms.length}+ rooms available`
-              : "Find your perfect stay"}
-          </p>
-        </div>
+      <div className="rooms-header">
+        <p className="highlight-text">OUR COLLECTION</p>
+        <p className="title-text">Rooms & Suites</p>
+        <p className="label-1">Find Your Perfect Stay</p>
       </div>
-
-      <div className="container rooms-page__layout">
-        {/* Sidebar Filters */}
-        <aside className="filters">
-          <div className="filters__section">
-            <p className="filters__heading">Room Type</p>
-            {filterData?.types?.map(({ type, count }) => (
-              <label key={type} className="filters__option">
-                <input
-                  type="checkbox"
-                  checked={filters.type === type}
-                  onChange={() => handleFilter("type", type)}
-                />
-                <span className="filters__option-label">{type}</span>
-                <span className="filters__option-count">{count}</span>
-              </label>
+      <div className="rooms-divider">
+        <FilterSideBar filters={filters} onChange={setFilters} />
+        <div className="rooms-grid">
+          <div className="container">
+            {allRooms.map((room) => (
+              <RoomCard key={room._id} room={room} />
             ))}
           </div>
-
-          <div className="filters__section">
-            <p className="filters__heading">Price Range</p>
-            <div className="filters__price">
-              <input
-                type="number"
-                placeholder={`Min GH₵${filterData?.minPrice ?? 0}`}
-                value={filters.minPrice}
-                onChange={(e) =>
-                  setFilters((p) => ({ ...p, minPrice: e.target.value }))
-                }
-              />
-              <span>—</span>
-              <input
-                type="number"
-                placeholder={`Max GH₵${filterData?.maxPrice ?? 9999}`}
-                value={filters.maxPrice}
-                onChange={(e) =>
-                  setFilters((p) => ({ ...p, maxPrice: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          <div className="filters__section">
-            <p className="filters__heading">Guests</p>
-            <div className="filters__guests">
-              {[1, 2, 3, 4].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={`filters__guest-btn ${filters.capacity === String(n) ? "active" : ""}`}
-                  onClick={() => handleFilter("capacity", String(n))}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {(filters.type ||
-            filters.minPrice ||
-            filters.maxPrice ||
-            filters.capacity) && (
+          {hasNextPage ? (
             <button
-              className="filters__clear"
-              onClick={() =>
-                setFilters({
-                  type: "",
-                  minPrice: "",
-                  maxPrice: "",
-                  capacity: "",
-                })
-              }
+              type="button"
+              disabled={isFetchingNextPage}
+              onClick={fetchNextPage}
+              className="btn-2"
             >
-              Clear Filters
+              {isFetchingNextPage ? "Loading more rooms" : "Load more"}
             </button>
-          )}
-        </aside>
-
-        {/* Room Grid */}
-        <main className="rooms-page__main">
-          {isPending ? (
-            <div className="page-loading">
-              <div className="spinner" />
-              <span>Loading rooms...</span>
-            </div>
-          ) : rooms.length === 0 ? (
-            <div className="rooms-page__empty">
-              <p className="display-md">No rooms found</p>
-              <p>Try adjusting your filters</p>
-            </div>
           ) : (
-            <>
-              <div className="rooms-grid">
-                {rooms.map((room) => (
-                  <RoomCard key={room._id} room={room} />
-                ))}
-              </div>
-              {hasNextPage && (
-                <div className="rooms-page__load-more">
-                  <button
-                    className="btn btn--outline btn--lg"
-                    onClick={fetchNextPage}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? "Loading..." : "Load More Rooms"}
-                  </button>
-                </div>
-              )}
-            </>
+            <p className="label-1 center">No more rooms.</p>
           )}
-        </main>
+        </div>
       </div>
+    </main>
+  );
+}
 
-      <Footer />
+function FilterSideBar({ filters = {}, onChange }) {
+  const { data, isPending } = useRoomFilters();
+
+  function handleMinPrice(e) {
+    onChange({ ...filters, minPrice: Number(e.target.value) });
+  }
+
+  function handleMaxPrice(e) {
+    onChange({ ...filters, maxPrice: Number(e.target.value) });
+  }
+
+  if (isPending) return <div>Loading filters....</div>;
+
+  return (
+    <div className="filter-sidebar">
+      <p className="filter-title">Room Type</p>
+      <hr />
+      {data?.types?.map(({ type, count }) => (
+        <div key={type} className="filter flex">
+          <input
+            type="checkbox"
+            id={type}
+            name={type}
+            checked={filters.type === type}
+            onChange={() =>
+              onChange({
+                ...filters,
+                type: filters.type === type ? undefined : type,
+              })
+            }
+          />
+          <label htmlFor={type}>
+            {type} ({count})
+          </label>
+        </div>
+      ))}
+      <p className="filter-title">Price Range</p>
+      <hr />
+      <div className="filter-group">
+        <label htmlFor="Min">Sort By:MinPrice</label>
+        <input
+          type="number"
+          name="Min"
+          value={filters.minPrice || ""}
+          placeholder={`Min ${data.minPrice ?? 0} GHC per night`}
+          onChange={handleMinPrice}
+        />
+      </div>
+      <div className="filter-group">
+        <label htmlFor="Max">Sort By:MaxPrice</label>
+        <input
+          type="number"
+          name="Max"
+          placeholder={`Max ${data.maxPrice ?? 0} GHC per night`}
+          value={filters.maxPrice || ""}
+          onChange={handleMaxPrice}
+        />
+      </div>
     </div>
   );
 }

@@ -12,7 +12,7 @@ import { protect, adminProtect, optionalAuth } from "../middleware/protect.js";
 
 export const bookingRouter = express.Router();
 
-bookingRouter.post("/create", optionalAuth, createBooking);
+bookingRouter.post("/create-booking", optionalAuth, createBooking);
 bookingRouter.get("/all", adminProtect, getAllBookings);
 bookingRouter.get("/bookings", protect, getMyBookings);
 bookingRouter.get("/guest-lookup", optionalAuth, guestLookup);

@@ -23,7 +23,7 @@ app.get("*", async (req, res) => {
       res.setHeader("Content-Type", "text/html");
       const stateHead = head.replace(
         "</head>",
-        `<script>window.__REACT_QUERY_STATE = ${JSON.stringify(dehydratedState)}</script></head>`,
+        `<script>window.__REACT_QUERY_STATE__ = ${JSON.stringify(dehydratedState)}</script></head>`,
       );
       res.write(stateHead);
       const appendTail = new Transform({

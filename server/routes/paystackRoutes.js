@@ -13,4 +13,5 @@ paystackRouter.post(
   express.raw({ type: "application/json" }),
   paystackWebhook,
 );
+
 paystackRouter.get("/verify", verifyPayment);

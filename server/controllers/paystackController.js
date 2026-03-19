@@ -1,5 +1,6 @@
 import "dotenv/config";
 import crypto from "crypto";
+import axios from "axios";
 import { Booking } from "../models/bookingModel.js";
 import { markOrderAsPaid } from "./bookingController.js";
 
@@ -32,12 +33,18 @@ export async function initializePayment(req, res) {
       });
 
     const reference = `booking_${booking._id}_${Date.now()}`;
+
+    await Booking.findByIdAndUpdate(bookingId, {
+      paystackReference: reference,
+    });
+
     const response = await axios.post(
       `${PAYSTACK_BASE}/transaction/initialize`,
       {
         email: booking?.customer?.email,
         amount: booking.totalPrice * 100,
-        callback_url: `${process.env.CLIENT_URL}/order-confirmation?reference=${reference}`,
+        reference,
+        callback_url: `http://localhost:9000/booking-confirmation?reference=${reference}`,
         metadata: {
           name: booking.customer?.name,
           email: booking.customer?.email,
@@ -45,8 +52,8 @@ export async function initializePayment(req, res) {
           checkIn: booking.checkIn,
           checkOut: booking.checkOut,
           nights: Math.ceil(
-            new Date(booking.checkOut) -
-              new Date(booking.checkIn) / (24 * 60 * 60 * 1000),
+            (new Date(booking.checkOut) - new Date(booking.checkIn)) /
+              (24 * 60 * 60 * 1000),
           ),
           totalPrice: booking.totalPrice,
           status: booking.status,
@@ -60,10 +67,6 @@ export async function initializePayment(req, res) {
         },
       },
     );
-
-    await Booking.findByIdAndUpdate(bookingId, {
-      paystackReference: reference,
-    });
 
     return res.status(200).json({
       success: true,
@@ -83,22 +86,30 @@ export async function initializePayment(req, res) {
 // @route GET /api/paystack/webhook
 // @access Public
 export async function paystackWebhook(req, res) {
+  const signature = req.headers["x-paystack-signature"];
+
+  const expectedSignature = crypto
+    .createHmac("sha512", PAYSTACK_SECRET)
+    .update(req.body)
+    .digest("hex");
+
+  // ✅ Always respond early
+  if (signature !== expectedSignature) {
+    return res.sendStatus(200);
+  }
+
+  const event = JSON.parse(req.body.toString());
+
+  // ✅ Respond immediately
+  res.sendStatus(200);
+
+  // 🔥 Process in background
   try {
-    const signature = req.headers["x-paystack-signature"];
-    const expectedSignature = crypto
-      .createHmac("sha512", PAYSTACK_SECRET)
-      .update(req.body)
-      .digest("hex");
-
-    if (signature !== expectedSignature)
-      return res.status(400).json({
-        success: false,
-        message: "Invalid signature",
-      });
-    const event = JSON.parse(req.body.toString());
-
     if (event.event === "charge.success") {
       const { reference } = event.data;
+      console.log("Webhook reference:", reference); // ← what does this print?
+      console.log("Expected format:", "booking_..._...");
+
       const verify = await axios.get(
         `${PAYSTACK_BASE}/transaction/verify/${reference}`,
         {
@@ -109,17 +120,13 @@ export async function paystackWebhook(req, res) {
       );
 
       const transaction = verify.data.data;
+
       if (transaction.status === "success") {
         await markOrderAsPaid(reference);
       }
     }
-    return res.status(200).json({ received: true });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+  } catch (err) {
+    console.error("Webhook processing error:", err);
   }
 }
 

@@ -132,7 +132,7 @@ export async function login(req, res) {
 
 export async function refresh(req, res) {
   try {
-    const token = req.headers.refreshToken;
+    const token = req.cookies.refreshToken;
     if (!token)
       return res.status(400).json({
         success: false,
@@ -160,6 +160,7 @@ export async function refresh(req, res) {
     const newRefreshToken = createRefreshToken(user);
     user.refreshToken = newRefreshToken;
     await user.save({ validateBeforeSave: false });
+    sendRefreshToken(res, newRefreshToken);
     return res.status(200).json({
       success: true,
       accessToken: newAccessToken,
@@ -264,7 +265,7 @@ export async function updateUserInfo(req, res) {
         message: "User not found",
       });
     }
-    const isMatch = req.user.id === user._id;
+    const isMatch = req.user.id === user._id.toString();
     if (!isMatch)
       return res.status(400).json({
         success: false,
@@ -278,7 +279,7 @@ export async function updateUserInfo(req, res) {
       if (currentImage.length > 0) {
         await deleteCloudinaryImages(currentImage);
       }
-      user.image = image;
+      user.image = newImage;
     }
 
     if (name) user.name = name;

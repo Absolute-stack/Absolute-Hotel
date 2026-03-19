@@ -24,12 +24,14 @@ app.use(
   }),
 );
 
-app.use(
-  "/api/paystack/webhook",
+app.post(
+  "/api/paystack/webhook", // ← correct full path
   express.raw({ type: "application/json" }),
   paystackWebhook,
 );
+
 app.use(compression());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

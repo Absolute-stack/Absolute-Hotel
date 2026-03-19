@@ -50,9 +50,15 @@ export default function Navbar() {
         </div>
         <div className="right flex">
           <div className="nav-links-container flex">
-            <NavLink className="hover-text-1">Rooms</NavLink>
-            <NavLink className="hover-text-1">Suites</NavLink>
-            <NavLink className="hover-text-1">Penthouses</NavLink>
+            <NavLink to="/rooms" className="hover-text-1">
+              Rooms
+            </NavLink>
+            <NavLink to={`/rooms?type=suite`} className="hover-text-1">
+              Suites
+            </NavLink>
+            <NavLink to={`/rooms?type=penthouse`} className="hover-text-1">
+              Penthouses
+            </NavLink>
           </div>
           <div
             className="nav-actions-container flex"
@@ -61,7 +67,7 @@ export default function Navbar() {
             {!user ? (
               <Link to="/login">Sign in</Link>
             ) : (
-              <Link className="logged-in-container">
+              <div className="logged-in-container">
                 <div className="user-info-container flex">
                   <p style={{ color: "white" }}>{user.name}</p>{" "}
                   <span>
@@ -83,7 +89,7 @@ export default function Navbar() {
                     </Link>
                   </div>
                 </div>
-              </Link>
+              </div>
             )}
             <button className="book-now-btn btn-1" type="button">
               Book Now

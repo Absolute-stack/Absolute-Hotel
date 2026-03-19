@@ -1,7 +1,7 @@
 import { api } from "../lib/axios.js";
 
 export async function createBooking(data) {
-  const res = await api.post("/api/booking/create", data);
+  const res = await api.post("/api/booking/create-booking", data);
   return res.data;
 }
 

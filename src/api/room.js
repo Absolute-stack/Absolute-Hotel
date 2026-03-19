@@ -2,7 +2,7 @@ import { api } from "../lib/axios.js";
 
 function getApi() {
   if (typeof window === "undefined") {
-    return `http://localhost:7000`;
+    return `http://localhost:8000`;
   } else {
     return import.meta.env.VITE_API_URL;
   }
@@ -19,14 +19,22 @@ export async function fetchRooms(filters = {}, pageParam) {
   if (filters.checkIn) params.set("checkIn", filters.checkIn);
   if (filters.checkOut) params.set("checkOut", filters.checkOut);
 
-  const res = await fetch(`${getApi()}/api/room/all?${params}`);
+  const res = await fetch(`${getApi()}/api/room/all?${params}`, {
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    },
+  });
   if (!res.ok) throw new Error("Fetching rooms failed");
 
   return res.json();
 }
 
 export async function fetchRoomFilters() {
-  const res = await fetch(`${getApi()}/api/room/room-filters`);
+  const res = await fetch(`${getApi()}/api/room/room-filters`, {
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    },
+  });
   if (!res.ok) throw new Error("Error fetching room filters");
   return res.json();
 }
@@ -34,12 +42,21 @@ export async function fetchRoomFilters() {
 export async function checkRoomAvailability(id, checkIn, checkOut) {
   const res = await api.get(
     `/api/room/check/${id}?checkIn=${checkIn}&checkOut=${checkOut}`,
+    {
+      headers: {
+        "ngrok-skip-browser-warning": "true",
+      },
+    },
   );
   return res.data;
 }
 
 export async function fetchRoomDetails(id) {
-  const res = await fetch(`${getApi()}/api/room/${id}`);
+  const res = await fetch(`${getApi()}/api/room/${id}`, {
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    },
+  });
   if (!res.ok) throw new Error("Error fetching room");
   return res.json();
 }

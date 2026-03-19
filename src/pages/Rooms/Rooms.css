@@ -1,146 +1,83 @@
-.rooms-page__hero {
-  padding-block: calc(var(--nav-height) + 3rem) 3rem;
-  background: var(--color-surface-2);
-  border-bottom: 1px solid var(--color-border);
-}
-.rooms-page__title {
-  margin-block: 0.5rem;
-}
-.rooms-page__sub {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
+.rooms .nav {
+  color: lightslategray;
 }
 
-.rooms-page__layout {
+.rooms .nav.active {
+  color: var(--color-accent);
+}
+
+.rooms .nav .user-info-container p {
+  color: lightslategray !important;
+}
+
+.rooms .nav.active .user-info-container p {
+  color: var(--color-accent) !important;
+}
+
+.rooms .nav.active .nav-links-container a {
+  color: var(--color-accent);
+}
+
+.rooms-header {
+  padding-block: 4rem;
+  padding-inline-start: 3.3rem;
+  background-color: var(--color-surface-2);
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+    rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+}
+
+.rooms .title-text {
+  font-size: 3rem;
+  font-style: normal;
+}
+
+.rooms .label-1 {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.rooms-divider {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 3rem;
-  padding-block: 3rem 6rem;
-  align-items: start;
-}
-
-/* Filters */
-.filters {
-  position: sticky;
-  top: calc(var(--nav-height) + 1rem);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-}
-.filters__section {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-.filters__section:last-child {
-  border-bottom: none;
-}
-.filters__heading {
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin-block-end: 1rem;
-}
-.filters__option {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0;
-  cursor: pointer;
-}
-.filters__option input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-accent);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.filters__option-label {
-  flex: 1;
-  font-size: 0.875rem;
-  text-transform: capitalize;
-  color: var(--color-text-primary);
-}
-.filters__option-count {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-.filters__price {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.filters__price input {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.filters__price input:focus {
-  border-color: var(--color-accent);
-}
-.filters__price span {
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
-}
-.filters__guests {
-  display: flex;
-  gap: 0.5rem;
-}
-.filters__guest-btn {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  transition: all var(--transition);
-}
-.filters__guest-btn:hover,
-.filters__guest-btn.active {
-  border-color: var(--color-accent);
-  background: var(--color-accent-light);
-  color: var(--color-accent-dark);
-}
-.filters__clear {
-  margin: 1rem 1.5rem 1.5rem;
-  font-size: 0.82rem;
-  color: var(--color-error);
-  text-decoration: underline;
-  text-align: left;
-}
-
-/* Main */
-.rooms-page__main {
-  min-height: 50vh;
-}
-.rooms-page__empty {
-  text-align: center;
-  padding: 5rem 0;
-  color: var(--color-text-muted);
-}
-.rooms-page__empty p:last-child {
-  margin-block-start: 0.5rem;
-  font-size: 0.9rem;
-}
-.rooms-page__load-more {
-  text-align: center;
+  grid-template-columns: 400px 1fr;
   margin-block-start: 3rem;
+  align-items: flex-start;
 }
 
-@media (max-width: 1024px) {
-  .rooms-page__layout {
-    grid-template-columns: 1fr;
-  }
-  .filters {
-    position: static;
-  }
+.rooms-grid .container {
+  gap: 2rem;
+  display: grid;
+  margin-block-start: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.filter-sidebar {
+  width: 100%;
+  padding: 3.5rem 1.5rem;
+  max-width: 380px;
+  border-radius: 1rem;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.filter-group input {
+  border-radius: 0.5rem;
+  padding-inline: 0.5rem;
+  border: 1px solid lightgrey;
+}
+
+.filter-title {
+  color: lightslategray;
+  padding-block-end: 1rem;
+}
+
+.filter-title:nth-of-type(2) {
+  margin-block-start: 1rem;
+}
+
+.filter:nth-of-type(1) {
+  margin-block-start: 0.5rem;
+}
+
+.filter-group label:nth-of-type(1) {
+  margin-block-start: 1rem;
 }

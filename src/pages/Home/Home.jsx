@@ -31,7 +31,6 @@ export default function Home() {
     const params = new URLSearchParams();
     if (checkIn) params.set("checkIn", checkIn);
     if (checkOut) params.set("checkOut", checkOut);
-    if (guests) params.set("capacity", guests);
     navigate(`/rooms?${params}`);
   }
 
@@ -99,25 +98,6 @@ export default function Home() {
               onChange={(e) => setCheckOut(e.target.value)}
               min={checkIn || new Date().toISOString().split("T")[0]}
             />
-          </div>
-          <div className="search-group">
-            <label htmlFor="guests" className="label-1 hero-select-label">
-              Guest
-            </label>
-            <select
-              name="guests"
-              className="hero-select"
-              value={guests}
-              onChange={(e) => setGuests(Number(e.target.value))}
-            >
-              {[1, 2, 3, 4].map((n) => {
-                return (
-                  <option key={n} value={n}>
-                    {n} Guest{n > 1 ? "s" : ""}
-                  </option>
-                );
-              })}
-            </select>
           </div>
           <button type="submit" className="hero-btn">
             Search

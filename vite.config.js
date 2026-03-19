@@ -13,6 +13,7 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: false,
+    manifest: true,
   },
   ssr: {
     noExternal: ["react-router-dom"],

@@ -1,5 +1,6 @@
-import rating_star from "../../assets/images/rating_star.png";
+import { Link } from "react-router-dom";
 import person from "../../assets/images/person.webp";
+import rating_star from "../../assets/images/rating_star.png";
 
 function RoomCardCompound({ children }) {
   return <div className="room-card">{children}</div>;
@@ -14,6 +15,7 @@ function CardImage({ src, alt }) {
       decoding="async"
       className="room-card-img"
       fetchPriority="high"
+      crossOrigin="anonymous"
     />
   );
 }
@@ -73,25 +75,27 @@ RoomCardCompound.CardPriceDetails = CardPriceDetails;
 
 export default function RoomCard({ room }) {
   return (
-    <RoomCardCompound>
-      <RoomCardCompound.CardLayout>
-        <RoomCardCompound.CardImage src={room?.images?.[0]} />
-        <RoomCardCompound.CardStats
-          floor={room?.floor}
-          roomNumber={room?.roomNumber}
-          avgRating={room?.avgRating}
-        />
-        <RoomCardCompound.CardName children={room.name} />
-        <RoomCardCompound.CardAmenities
-          children={room?.amenities?.slice(0, 4).map((amenity) => {
-            return <span>{amenity}</span>;
-          })}
-        />
-        <RoomCardCompound.CardPriceDetails
-          price={room.price}
-          capacity={room.capacity}
-        />
-      </RoomCardCompound.CardLayout>
-    </RoomCardCompound>
+    <Link to={`/room-details/${room._id}`}>
+      <RoomCardCompound>
+        <RoomCardCompound.CardLayout>
+          <RoomCardCompound.CardImage src={room?.images?.[0]} />
+          <RoomCardCompound.CardStats
+            floor={room?.floor}
+            roomNumber={room?.roomNumber}
+            avgRating={room?.avgRating}
+          />
+          <RoomCardCompound.CardName children={room.name} />
+          <RoomCardCompound.CardAmenities
+            children={room?.amenities?.slice(0, 4).map((amenity) => {
+              return <span>{amenity}</span>;
+            })}
+          />
+          <RoomCardCompound.CardPriceDetails
+            price={room.price}
+            capacity={room.capacity}
+          />
+        </RoomCardCompound.CardLayout>
+      </RoomCardCompound>
+    </Link>
   );
 }

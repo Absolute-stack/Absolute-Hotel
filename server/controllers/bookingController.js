@@ -15,20 +15,20 @@ export async function createBooking(req, res) {
       specialRequest,
       guestName,
       guestEmail,
-      guestPhone,
+      phone,
     } = req.body;
 
     const guest = !req.user;
-    if (guest && (!guestName || !guestEmail || !guestPhone))
+    if (guest && (!guestName || !guestEmail))
       return res.status(400).json({
         success: false,
-        message: "Name email and phone is required",
+        message: "Name and email  is required",
       });
 
-    if (!roomId || !checkIn || !checkOut || !guests)
+    if (!roomId || !checkIn || !checkOut || !guests || !phone)
       return res.status(400).json({
         success: false,
-        message: "roomId,checkIn,checkOut,guests are required",
+        message: "roomId,checkIn,checkOut,phone,guests are required",
       });
 
     const room = await Room.findById(roomId);
@@ -79,7 +79,7 @@ export async function createBooking(req, res) {
       userId: guest ? null : req.user.id,
       name: guest ? guestName : req.user.name,
       email: guest ? guestEmail : req.user.email,
-      phone: guest ? guestPhone : req.body.phone,
+      phone,
     };
     const booking = await Booking.create({
       customer,
@@ -294,17 +294,20 @@ export async function getBooking(req, res) {
 // @desc helper function for paystack webhook
 
 export async function markOrderAsPaid(reference) {
-  const booking = await Booking.findOne({ paystackReference: reference });
-  if (!booking) throw new Error("Booking not found");
-
-  await Booking.findOneAndUpdate(
+  const booking = await Booking.findOneAndUpdate(
     { paystackReference: reference },
     {
-      paymentStatus: "paid",
+      $set: { paymentStatus: "paid" },
     },
     {
-      new: true,
+      new: true, // return updated doc
       runValidators: false,
     },
   );
+
+  if (!booking) {
+    throw new Error("Booking not found");
+  }
+
+  return booking;
 }

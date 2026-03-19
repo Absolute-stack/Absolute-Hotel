@@ -1,322 +1,252 @@
 import "./RoomDetails.css";
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useRoom } from "../../hooks/useRooms.js";
 import { useStore } from "../../store/store.js";
-import { createBooking, initializePayment } from "../../api/booking.js";
+import star from "../../assets/images/star.webp";
+import { useRoom } from "../../hooks/useRooms.js";
+import { Link, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar.jsx";
-import Footer from "../../components/Footer/Footer.jsx";
+import { createBooking, initializePayment } from "../../api/booking.js";
+
+const initialForm = {
+  roomId: "",
+  checkIn: "",
+  checkOut: "",
+  phone: "",
+  guests: 1,
+  specialRequest: "",
+  guestName: "",
+  guestEmail: "",
+};
 
 export default function RoomDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [heroImage, setHeroImage] = useState();
   const { data, isPending } = useRoom(id);
+  const [form, setForm] = useState(initialForm);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const user = useStore((state) => state.auth.user);
 
-  const [heroImage, setHeroImage] = useState(null);
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(1);
-  const [specialRequest, setSpecialRequest] = useState("");
-  const [guestName, setGuestName] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestPhone, setGuestPhone] = useState("");
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  function handleFormChange(e) {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
 
-  if (isPending)
-    return (
-      <div className="page-loading">
-        <div className="spinner" />
-        <span>Loading room...</span>
-      </div>
-    );
-
-  const room = data?.room;
-  if (!room)
-    return (
-      <div className="room-not-found">
-        <Navbar />
-        <div
-          className="container"
-          style={{ paddingBlock: "8rem", textAlign: "center" }}
-        >
-          <p className="display-md">Room not found</p>
-          <Link
-            to="/rooms"
-            className="btn btn--primary"
-            style={{ marginBlockStart: "1.5rem" }}
-          >
-            Back to Rooms
-          </Link>
-        </div>
-      </div>
-    );
-
-  const nights =
-    checkIn && checkOut
-      ? Math.ceil(
-          (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24),
-        )
-      : 0;
-
-  const totalPrice = nights * room.price;
-  const isGuest = !user;
-
-  function validate() {
-    if (!checkIn) return "Check-in date is required";
-    if (!checkOut) return "Check-out date is required";
-    if (nights <= 0) return "Check-out must be after check-in";
-    if (guests > room.capacity)
-      return `Max capacity is ${room.capacity} guests`;
-    if (isGuest && !guestName) return "Name is required";
-    if (isGuest && !guestEmail) return "Email is required";
-    if (isGuest && !guestPhone) return "Phone is required";
+  function validateError() {
+    if (!form.checkIn) return setError("CheckIn date is required");
+    if (!form.checkOut) return setError("CheckOut date is required");
+    if (!form.guests) return setError("Guests is required");
+    if (!form.phone) return setError("Phone is required");
+    if (!user && !form.guestName) return setError("Guest name is required");
+    if (!user && !form.guestEmail) return setError("Guest email is required");
     return null;
   }
 
-  async function handleBook() {
-    const err = validate();
-    if (err) return setError(err);
-    setIsLoading(true);
-    setError(null);
+  if (isPending) return <div>loading...</div>;
 
+  async function book(e) {
+    e.preventDefault();
+    if (validateError()) return;
+    setLoading(true);
     try {
-      const bookingData = {
-        roomId: room._id,
-        checkIn,
-        checkOut,
-        guests,
-        specialRequest,
-        ...(isGuest && { guestName, guestEmail, guestPhone }),
+      const body = {
+        roomId: data?.room?._id,
+        checkIn: form.checkIn,
+        checkOut: form.checkOut,
+        guests: form.guests,
+        phone: form.phone,
+        ...(!user && {
+          guestName: form.guestName,
+          guestEmail: form.guestEmail,
+        }),
       };
 
-      const { booking } = await createBooking(bookingData);
-      const { authorizationURL } = await initializePayment(booking._id);
+      const { booking } = await createBooking(body);
+      const bookingId = booking._id;
+      const { authorizationURL } = await initializePayment(bookingId);
       window.location.href = authorizationURL;
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
+    } catch (error) {
+      return setError("Something went wrong please try again later");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }
 
+  const room = data?.room;
+  if (!room) return <div>Room not found</div>;
+
   return (
-    <div className="room-details">
+    <main className="room-details">
       <Navbar />
-
-      <div className="container room-details__layout">
-        {/* Left: Images + Info */}
-        <div className="room-details__left">
-          {/* Breadcrumb */}
-          <div className="room-details__bc">
-            <Link to="/">Home</Link>
-            <span>›</span>
-            <Link to="/rooms">Rooms</Link>
-            <span>›</span>
-            <span>{room.name}</span>
-          </div>
-
-          {/* Hero Image */}
-          <div className="room-details__hero-img-wrap">
-            <img
-              src={heroImage || room.images?.[0]}
-              alt={room.name}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              className="room-details__hero-img"
-            />
-            <div className="room-details__img-badge">{room.type}</div>
-          </div>
-
-          {/* Thumbnails */}
-          {room.images?.length > 1 && (
-            <div className="room-details__thumbnails">
-              {room.images.map((img) => (
-                <button
-                  key={img}
-                  onClick={() => setHeroImage(img)}
-                  className={`room-details__thumb ${heroImage === img ? "active" : ""}`}
-                >
-                  <img src={img} alt={room.name} loading="lazy" />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Info */}
-          <div className="room-details__info">
-            <div className="room-details__meta">
-              <span className="badge badge--gold">{room.type}</span>
-              {room.avgRating > 0 && (
-                <span className="room-details__rating">
-                  ★ {Number(room.avgRating).toFixed(1)}
-                  <span className="room-details__rating-count">
-                    ({room.totalReviews} reviews)
-                  </span>
-                </span>
-              )}
-            </div>
-
-            <h1 className="display-md room-details__name">{room.name}</h1>
-            <p className="room-details__location">
-              Floor {room.floor} · Room {room.roomNumber} · Up to{" "}
-              {room.capacity} guests
-            </p>
-            <p className="room-details__description">{room.description}</p>
-
-            {/* Amenities */}
-            <div className="room-details__amenities-section">
-              <p className="room-details__section-title">Amenities</p>
-              <div className="room-details__amenities">
-                {room.amenities?.map((a) => (
-                  <span key={a} className="room-details__amenity">
-                    ✓ {a}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+      <div className="container">
+        <div className="room-details-breadcrumb flex-05">
+          <Link to="/">Home</Link>
+          <span>›</span>
+          <Link to="/rooms">Rooms</Link>
+          <span>›</span>
+          <Link to="#">{room.name}</Link>
         </div>
-
-        {/* Right: Booking Card */}
-        <aside className="booking-card">
-          <div className="booking-card__price">
-            <span className="booking-card__amount">
-              GH₵{room.price?.toLocaleString()}
-            </span>
-            <span className="booking-card__night"> / night</span>
-          </div>
-
-          <div className="booking-card__form">
-            <div className="form-row">
-              <div className="form-group">
-                <label>Check In</label>
-                <input
-                  type="date"
-                  value={checkIn}
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Check Out</label>
-                <input
-                  type="date"
-                  value={checkOut}
-                  min={checkIn || new Date().toISOString().split("T")[0]}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                />
+        <div className="room-details-divider">
+          <div className="left-room-details">
+            <div className="room-details-hero-img-container">
+              <img
+                src={heroImage || room?.images?.[0]}
+                alt={room?.name}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+              />
+            </div>
+            <div className="images-grid">
+              {room.images?.map((image) => {
+                return (
+                  <img
+                    key={image}
+                    src={image}
+                    alt={room.name}
+                    loading="eager"
+                    decoding="async"
+                    onClick={() => setHeroImage(image)}
+                  />
+                );
+              })}
+            </div>
+            <div className="type-stats">
+              <p>{room.type}</p>
+              <div className="flex-sml">
+                <img src={star} alt="star-icon" />
+                {room.avgRating}
               </div>
             </div>
-
-            <div className="form-group">
-              <label>Guests</label>
+            <p className="title-text">{room.name}</p>
+            <div className="div">
+              floor{room.floor} Room{room.roomNumber} Up to Guests.
+            </div>
+            <p className="spec">{room.description}</p>
+            <p className="spec">Amenities</p>
+            <div className="amenities-grid">
+              {room.amenities?.map((amenity) => {
+                return (
+                  <p key={amenity} className="flex">
+                    <span>✓</span>
+                    {amenity}
+                  </p>
+                );
+              })}
+            </div>
+          </div>
+          <div className="right-room-details">
+            <form onSubmit={book} className="flow">
+              <h2 className="flex-sml">
+                GHC{room.price}
+                <span className="">/night</span>
+              </h2>
+              <div className="form-groups-container flex-sb">
+                <div className="form-group">
+                  <label htmlFor="checkIn" className="label-1">
+                    CheckIn
+                  </label>
+                  <input
+                    name="checkIn"
+                    type="date"
+                    value={form.checkIn}
+                    onChange={handleFormChange}
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="checkOut" className="label-1">
+                    CheckOut
+                  </label>
+                  <input
+                    name="checkOut"
+                    type="date"
+                    onChange={handleFormChange}
+                    value={form.checkOut}
+                    min={form.checkIn || new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+              </div>
+              <label htmlFor="guests" className="guest-label label-1">
+                Guests
+              </label>
               <select
-                value={guests}
-                onChange={(e) => setGuests(Number(e.target.value))}
+                name="guests"
+                value={form.guests}
+                onChange={handleFormChange}
+                className="room-details-select"
               >
-                {Array.from({ length: room.capacity }, (_, i) => i + 1).map(
-                  (n) => (
+                {[1, 2, 3, 4].map((n) => {
+                  return (
                     <option key={n} value={n}>
                       {n} Guest{n > 1 ? "s" : ""}
                     </option>
-                  ),
-                )}
+                  );
+                })}
               </select>
-            </div>
-
-            {/* Guest details if not logged in */}
-            {isGuest && (
-              <>
+              {!user && (
                 <div className="form-group">
-                  <label>Full Name</label>
+                  <label htmlFor="guestName" className="label-1">
+                    Full Name
+                  </label>
                   <input
                     type="text"
-                    placeholder="John Doe"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
+                    name="guestName"
+                    onChange={handleFormChange}
+                    value={form.guestName}
+                    placeholder="frank hoe"
                   />
                 </div>
+              )}
+              {!user && (
                 <div className="form-group">
-                  <label>Email</label>
+                  <label htmlFor="guestEmail" className="label-1">
+                    Email
+                  </label>
                   <input
                     type="email"
-                    placeholder="john@email.com"
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
+                    name="guestEmail"
+                    onChange={handleFormChange}
+                    value={form.guestEmail}
+                    placeholder="frankhoe@gmail.com"
                   />
                 </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input
-                    type="tel"
-                    placeholder="+233 XX XXX XXXX"
-                    value={guestPhone}
-                    onChange={(e) => setGuestPhone(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-
-            {!isGuest && (
-              <div className="booking-card__user-info">
-                Booking as <strong>{user.name}</strong>
+              )}
+              <div className="form-group">
+                <label
+                  htmlFor={user ? "phone" : "guestPhone"}
+                  className="label-1"
+                >
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  onChange={handleFormChange}
+                  name={"phone"}
+                  value={form.phone}
+                  className="label-1"
+                  placeholder="+233 XXX XXXX"
+                />
               </div>
-            )}
-
-            <div className="form-group">
-              <label>Special Requests (optional)</label>
-              <textarea
-                rows={2}
-                placeholder="Any special requirements..."
-                value={specialRequest}
-                onChange={(e) => setSpecialRequest(e.target.value)}
-              />
-            </div>
+              <div className="form-group">
+                <label htmlFor="specialRequest" className="label-1">
+                  Special Request
+                </label>
+                <input
+                  type="text"
+                  name="specialRequest"
+                  value={form.specialRequest}
+                  onChange={handleFormChange}
+                  placeholder="Optional"
+                />
+              </div>
+              <button type="submit" disabled={loading}>
+                {loading ? "Booking" : "Book"}
+              </button>
+              {error && <pre>{error}</pre>}
+            </form>
           </div>
-
-          {/* Price breakdown */}
-          {nights > 0 && (
-            <div className="booking-card__breakdown">
-              <div className="booking-card__breakdown-row">
-                <span>
-                  GH₵{room.price?.toLocaleString()} × {nights} night
-                  {nights > 1 ? "s" : ""}
-                </span>
-                <span>GH₵{totalPrice?.toLocaleString()}</span>
-              </div>
-              <div className="booking-card__total">
-                <span>Total</span>
-                <span>GH₵{totalPrice?.toLocaleString()}</span>
-              </div>
-            </div>
-          )}
-
-          {error && <p className="error-text">{error}</p>}
-
-          <button
-            className="btn btn--primary btn--full btn--lg"
-            onClick={handleBook}
-            disabled={isLoading || !room.isAvailable}
-          >
-            {!room.isAvailable
-              ? "Room Unavailable"
-              : isLoading
-                ? "Processing..."
-                : "Reserve Now"}
-          </button>
-
-          {!user && (
-            <p className="booking-card__login-hint">
-              <Link to="/login">Sign in</Link> to manage your bookings easily
-            </p>
-          )}
-        </aside>
+        </div>
       </div>
-
-      <Footer />
-    </div>
+    </main>
   );
 }

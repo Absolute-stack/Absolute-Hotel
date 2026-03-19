@@ -46,7 +46,7 @@ authRouter.get(
       user.refreshToken = refreshToken;
       await user.save({ validateBeforeSave: false });
       sendRefreshToken(res, refreshToken);
-      return res.redirect(`http://localhost:5173/oauth?token=${accessToken}`);
+      return res.redirect(`http://localhost:9000/oauth?token=${accessToken}`);
     } catch (error) {
       console.error(error);
       return res.status(500).json({
