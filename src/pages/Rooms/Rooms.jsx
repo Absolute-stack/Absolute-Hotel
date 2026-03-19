@@ -14,6 +14,7 @@ export default function Rooms() {
     minPrice: "",
     maxPrice: "",
   });
+  const [filtersOpen, setFiltersOpen] = useState(false); // ← mobile toggle
 
   const { data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useRooms(filters);
@@ -30,8 +31,23 @@ export default function Rooms() {
         <p className="title-text">Rooms & Suites</p>
         <p className="label-1">Find Your Perfect Stay</p>
       </div>
+
+      {/* Mobile filter toggle — hidden on desktop via CSS */}
+      <button
+        type="button"
+        className="filter-toggle-btn"
+        onClick={() => setFiltersOpen((prev) => !prev)}
+      >
+        <span>⚙</span>
+        {filtersOpen ? "Hide Filters" : "Show Filters"}
+      </button>
+
       <div className="rooms-divider">
-        <FilterSideBar filters={filters} onChange={setFilters} />
+        <FilterSideBar
+          filters={filters}
+          onChange={setFilters}
+          isOpen={filtersOpen}
+        />
         <div className="rooms-grid">
           <div className="container">
             {allRooms.map((room) => (
@@ -56,7 +72,7 @@ export default function Rooms() {
   );
 }
 
-function FilterSideBar({ filters = {}, onChange }) {
+function FilterSideBar({ filters = {}, onChange, isOpen }) {
   const { data, isPending } = useRoomFilters();
 
   function handleMinPrice(e) {
@@ -70,7 +86,8 @@ function FilterSideBar({ filters = {}, onChange }) {
   if (isPending) return <div>Loading filters....</div>;
 
   return (
-    <div className="filter-sidebar">
+    // ← adds "open" class on mobile to trigger the drawer animation
+    <div className={`filter-sidebar ${isOpen ? "open" : ""}`}>
       <p className="filter-title">Room Type</p>
       <hr />
       {data?.types?.map(({ type, count }) => (
@@ -95,7 +112,7 @@ function FilterSideBar({ filters = {}, onChange }) {
       <p className="filter-title">Price Range</p>
       <hr />
       <div className="filter-group">
-        <label htmlFor="Min">Sort By:MinPrice</label>
+        <label htmlFor="Min">Sort By: Min Price</label>
         <input
           type="number"
           name="Min"
@@ -105,7 +122,7 @@ function FilterSideBar({ filters = {}, onChange }) {
         />
       </div>
       <div className="filter-group">
-        <label htmlFor="Max">Sort By:MaxPrice</label>
+        <label htmlFor="Max">Sort By: Max Price</label>
         <input
           type="number"
           name="Max"

@@ -170,3 +170,197 @@
 .home-page .nav.active .user-info-container p {
   color: var(--color-accent) !important;
 }
+
+/* ============================================
+   HOME PAGE — Tablet (max-width: 1024px)
+   ============================================ */
+@media (max-width: 1024px) {
+  .hero-content {
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .search-bar {
+    width: 90%;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-radius: 1rem;
+    left: 50%;
+  }
+
+  .hero-btn {
+    width: 100%;
+    padding-inline: 2rem;
+  }
+
+  .amenities-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 4rem 2rem;
+  }
+
+  .rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cta {
+    padding-inline: 2rem;
+  }
+}
+
+/* ============================================
+   HOME PAGE — Mobile (max-width: 768px)
+   ============================================ */
+@media (max-width: 768px) {
+  /* ---- Hero ---- */
+  .hero-container {
+    height: 100svh;
+  }
+
+  .hero-content {
+    top: 32%;
+    left: 50%;
+    width: 88%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-content p:nth-child(1) {
+    font-size: 0.95rem;
+  }
+
+  .hero-content p:nth-child(2),
+  .hero-content p:nth-child(3) {
+    font-size: 3rem;
+    line-height: 1.1;
+  }
+
+  .subtitle-text {
+    font-size: 1rem;
+    margin-block-start: 0.25rem;
+  }
+
+  /* ---- Search bar ---- */
+  .search-bar {
+    top: 80%;
+    left: 50%;
+    width: 92%;
+    gap: 0.6rem;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem 1.2rem;
+    border-radius: 1.2rem;
+    transform: translate(-50%, -50%);
+  }
+
+  .search-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-group input[type="date"] {
+    width: 100%;
+    height: 38px;
+    border-bottom: 1px solid var(--color-border);
+    padding-inline-start: 0.2rem;
+  }
+
+  .hero-btn {
+    width: 100%;
+    height: 44px;
+    padding-inline: 1rem;
+    border-radius: 0.8rem;
+    margin-block-start: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  /* ---- Hotel stats ---- */
+  .hotel-stats {
+    gap: 0;
+    flex-wrap: wrap;
+    padding-block: 1.5rem;
+    justify-content: space-around;
+  }
+
+  .hotel-stat-container {
+    width: 45%;
+    padding-block: 1rem;
+    text-align: center;
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .stat-value {
+    font-size: 2.2rem;
+  }
+
+  /* ---- Featured rooms ---- */
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    padding-inline: 0.5rem;
+  }
+
+  .card-layout {
+    max-width: 100%;
+  }
+
+  .view-rooms-btn {
+    width: 92%;
+    justify-content: center;
+    margin-block: 1.5rem;
+  }
+
+  /* ---- Amenities ---- */
+  .amenities-section {
+    padding-block: 0;
+  }
+
+  .amenities-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 2.5rem 1rem;
+    gap: 1rem;
+  }
+
+  .amenity-icon {
+    font-size: 2rem;
+  }
+
+  .amenity-card {
+    padding: 0.8rem;
+  }
+
+  /* ---- CTA ---- */
+  .cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .cta .right-container {
+    padding-inline-start: 0;
+  }
+
+  .cta .right-container p:nth-of-type(2) {
+    font-size: 1.5rem;
+  }
+
+  .cta button {
+    width: 100%;
+    height: 44px;
+    margin-inline-end: 0;
+    border-radius: 0.5rem;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ---- Typography tweaks ---- */
+  .title-text-1 {
+    font-size: 1.6rem;
+  }
+
+  .highlight-text-2 {
+    margin-block-start: 1.5rem;
+  }
+}
